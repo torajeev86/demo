@@ -1,21 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Post</title>
-</head>
-<body>
-    <h1>Create a New Post</h1>
-    <form action="{{ route('posts.store') }}" method="POST">
-        @csrf
-        <label for="title">Title</label>
-        <input type="text" name="title" id="title" required>
-        <br>
-        <label for="content">Content</label>
-        <textarea name="content" id="content" required></textarea>
-        <br>
-        <button type="submit">Create Post</button>
-    </form>
-</body>
-</html>
+@extends('layouts.app')
+
+@section('content')
+    <div class="container">
+        <h1>Create Post</h1>
+        <form action="{{ route('posts.store') }}" method="POST">
+            @csrf
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea class="form-control" id="content" name="content" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success mt-3">Create Post</button>
+        </form>
+    </div>
+@endsection

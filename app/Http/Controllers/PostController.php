@@ -31,7 +31,13 @@ class PostController extends Controller
  
          return redirect()->route('posts.index')->with('success', 'Post created successfully.');
      }
- 
+
+    // Show a specific post
+    public function show(Post $post)
+    {
+        return view('posts.show', compact('post'));
+    }
+    
      // Show the form to edit an existing post
      public function edit(Post $post)
      {
