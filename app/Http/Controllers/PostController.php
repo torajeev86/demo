@@ -1,8 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
 {
@@ -22,14 +25,26 @@ class PostController extends Controller
      // Store the new post in the database
      public function store(Request $request)
      {
-         $request->validate([
-             'title' => 'required',
-             'content' => 'required',
-         ]);
- 
-         Post::create($request->all());
- 
-         return redirect()->route('posts.index')->with('success', 'Post created successfully.');
+    
+        $request->validate([
+            'title' => 'required|max:255',
+            'content' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2050',
+        ]);
+
+        $post = new Post();
+        $post->title = $request->title;
+        $post->content = $request->content;
+
+          // Image upload
+            if ($request->hasFile('image')) {
+                $imagePath =$request->file('image')->store('images', 'public');
+                $post->image = basename($imagePath); // Save the filename
+            }
+
+        $post->save();
+
+        return redirect()->route('posts.index')->with('success', 'Post created successfully.');
      }
 
     // Show a specific post
@@ -47,21 +62,43 @@ class PostController extends Controller
      // Update the post in the database
      public function update(Request $request, Post $post)
      {
-         $request->validate([
-             'title' => 'required',
-             'content' => 'required',
-         ]);
- 
-         $post->update($request->all());
- 
-         return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
+        $request->validate([
+            'title' => 'required|max:255',
+            'content' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $post->title = $request->title;
+        $post->content = $request->content;
+
+        // Image upload
+        if ($request->hasFile('image')) {
+            // Delete the old image if exists
+            if (File::exists(storage_path('app/public/images/' . $post->image))) {
+                File::delete(storage_path('app/public/images/' . $post->image));
+            }
+            if ($request->hasFile('image')) {
+                $imagePath =$request->file('image')->store('images', 'public');
+                $post->image = basename($imagePath); // Save the filename
+            }
+            $imagePath =$request->file('image')->store('images', 'public');
+            $post->image = basename($imagePath); // Save the new image filename
+        }
+
+        $post->save();
+
+        return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
      }
  
      // Delete the post from the database
      public function destroy(Post $post)
      {
-         $post->delete();
- 
+        if (File::exists(storage_path('app/public/images/' . $post->image))) {
+            File::delete(storage_path('app/public/images/' . $post->image));
+        }
+
+        $post->delete();
+
          return redirect()->route('posts.index')->with('success', 'Post deleted successfully.');
      }
 }
